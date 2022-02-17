@@ -48,7 +48,7 @@ def select_features(index_file, select_n, X_total):
 
 def classification(X_scale, X_scale_test, y):
     clf = ExtraTreesClassifier(criterion='entropy', bootstrap=False, max_leaf_nodes=None,
-                               min_impurity_split=0.1, max_features=43, class_weight='balanced',
+                               min_impurity_decrease=0.1, max_features=43, class_weight='balanced',
                                min_samples_split=5, min_samples_leaf=1, max_depth=18, n_estimators=115)
     X_features1 = select_features('RFE_clf_indices.txt', 70, X_scale)
     X_features_test1 = select_features('RFE_clf_indices.txt', 70, X_scale_test)
