@@ -6,6 +6,7 @@ from sklearn.ensemble import ExtraTreesClassifier
 from feature_vector import gen_test, gen_train
 from sklearn.feature_selection import VarianceThreshold
 from sklearn import preprocessing
+import os
 
 def read_data(cont_name, disc_name):
     cdata = pd.read_csv(cont_name, index_col=0)
@@ -129,9 +130,127 @@ if __name__ == "__main__":
     EaH_predict = reg_EaH(X_scale, X_scale_test, ye)
     FE_predict = reg_FE(X_scale, X_scale_test, yf, ye)
     output = 'prediction_result.xls'
-    write_result(testfile, output, clf_result, EaH_predict, FE_predict)
+    
+    # expoert data for SageMaker Canvas
+    trainfile_df = pd.read_excel(trainfile)
+    testfile_df = pd.read_excel(testfile)
+ 
+    train_ratio = 0.7
+    length = len(X_scale_with_id_and_answers)
+    random_index = random.sample(range(length), length)
+    train_index = random_index[:int(train_ratio*length)]
+    val_index = random_index[int(train_ratio*length):]
+
+    EaH = pd.concat((trainfile_df[['Material Composition',
+                                        'energy_above_hull (meV/atom)']],
+                           X_scale), axis=1)
+
+    FE = pd.concat((trainfile_df[['Material Composition',
+                                        'formation_energy (eV/atom)']],
+                           X_scale), axis=1)
 
 
+    EaH_train = EaH.loc[train_index]
+    EaH_val = EaH.loc[val_index]
+
+    FE_train = FE.loc[train_index]
+    FE_val = FE.loc[val_index]
+
+    EaH_test = pd.concat((testfile_df[['Material Composition',
+                                        'energy_above_hull (meV/atom)']],
+                           X_scale_test), axis=1)
+
+    FE_test = pd.concat((testfile_df[['Material Composition',
+                                        'formation_energy (eV/atom)']],
+                           X_scale_test), axis=1)
+
+    # export to csv
+    prefix = "sagemaker/data"
+    EaH.to_csv(os.path.join(prefix, "EaH.csv"))
+    EaH_train.to_csv(os.path.join(prefix, "EaH_train.csv"))
+    EaH_val.to_csv(os.path.join(prefix, "EaH_val.csv"))
+    EaH_test.to_csv(os.path.join(prefix, "EaH_test.csv"))   
+
+    FE.to_csv(os.path.join(prefix, "FE.csv"))  
+    FE_train.to_csv(os.path.join(prefix, "FE_train.csv"))  
+    FE_val.to_csv(os.path.join(prefix, "FE_val.csv"))
+    FE_test.to_csv(os.path.join(prefix, "FE_test.csv"))   
+
+    # export to original data
+    trainfile_df.to_csv("trainfile.csv")
+    testfile_df.to_csv("testfile.csv")
+
+
+    
+
+    
+
+
+
+
+    trainfile = 'xls/perovskite_DFT_EaH_FormE.xls' if len(sys.argv)<=1 else sys.argv[1]
+    testfile = 'xls/newCompound.xls' if len(sys.argv)<=2 else sys.argv[2]
+    id = 0 if len(sys.argv)<=3 else sys.argv[3]
+
+    X_scale, X_scale_test, y, ye, yf = wrap_data(trainfile, testfile, id)
+    clf_result = classification(X_scale, X_scale_test, y)
+    EaH_predict = reg_EaH(X_scale, X_scale_test, ye)
+    FE_predict = reg_FE(X_scale, X_scale_test, yf, ye)
+    output = 'prediction_result.xls'
+    
+    ### expoert data for SageMaker Canvas
+    trainfile_df = pd.read_excel(trainfile)
+    testfile_df = pd.read_excel(testfile)
+ 
+    train_ratio = 0.7
+    length = len(X_scale_with_id_and_answers)
+    random_index = random.sample(range(length), length)
+    train_index = random_index[:int(train_ratio*length)]
+    val_index = random_index[int(train_ratio*length):]
+
+    EaH = pd.concat((trainfile_df[['Material Composition',
+                                        'energy_above_hull (meV/atom)']],
+                           X_scale), axis=1)
+
+    FE = pd.concat((trainfile_df[['Material Composition',
+                                        'formation_energy (eV/atom)']],
+                           X_scale), axis=1)
+
+
+    EaH_train = EaH.loc[train_index]
+    EaH_val = EaH.loc[val_index]
+
+    FE_train = FE.loc[train_index]
+    FE_val = FE.loc[val_index]
+
+    EaH_test = pd.concat((testfile_df[['Material Composition',
+                                        'energy_above_hull (meV/atom)']],
+                           X_scale_test), axis=1)
+
+    FE_test = pd.concat((testfile_df[['Material Composition',
+                                        'formation_energy (eV/atom)']],
+                           X_scale_test), axis=1)
+
+    # export to csv
+    prefix = "sagemaker/data"
+    EaH.to_csv(os.path.join(prefix, "EaH.csv"), index=False)
+    EaH_train.to_csv(os.path.join(prefix, "EaH_train.csv"), index=False)
+    EaH_val.to_csv(os.path.join(prefix, "EaH_val.csv"), index=False)
+    EaH_test.to_csv(os.path.join(prefix, "EaH_test.csv"), index=False)   
+
+    FE.to_csv(os.path.join(prefix, "FE.csv"), index=False)  
+    FE_train.to_csv(os.path.join(prefix, "FE_train.csv"), index=False)  
+    FE_val.to_csv(os.path.join(prefix, "FE_val.csv"), index=False)
+    FE_test.to_csv(os.path.join(prefix, "FE_test.csv"), index=False)   
+
+    # export to original data
+    trainfile_df.to_csv(os.path.join(prefix, "trainfile.csv"), index=False)
+    testfile_df.to_csv(os.path.join(prefix, "testfile.csv"), index=False)
+
+
+    
+
+    
 
 
 
