@@ -22,13 +22,13 @@ def buildDict(attribute_index, refsheet, ifnulldefault):
 	return attribute
 
 def radii_shannon(shannon_name):
-	dict_radii = pd.read_excel('shannon_perovskite.xlsx')
+	dict_radii = pd.read_excel('xls/shannon_perovskite.xls')
 	A_r = dict(zip(dict_radii['Asite'],dict_radii['Aradii']))
 	B_r = dict(zip(dict_radii['Bsite'],dict_radii['Bradii']))
 	X_r = dict(zip(dict_radii['Xsite'],dict_radii['Xradii']))
 	return A_r, B_r, X_r
 
-A_r, B_r, X_r = radii_shannon('shannon_perovskite.xlsx')
+A_r, B_r, X_r = radii_shannon('xls/shannon_perovskite.xls')
 
 def getComp(row_index, sheetname, col_index, compositionname, dicList, add_shannon=False):
 	sites = []
@@ -175,9 +175,9 @@ def gen_vector(book_name, contList, discList):
 		# Asingles = [np.zeros((len(Astatics[0]))), np.zeros((len(Astatics[0]))), np.zeros((len(Astatics[0])))]
 		# Bsingles = [np.zeros((len(Bstatics[0]))), np.zeros((len(Bstatics[0]))), np.zeros((len(Bstatics[0])))]
 		# for i in range(Astatics.shape[0]):
-		# 	Asingles[i] = Astatics[i]
+		#	 Asingles[i] = Astatics[i]
 		# for i in range(Bstatics.shape[0]):
-		# 	Bsingles[i] = Bstatics[i]
+		#	 Bsingles[i] = Bstatics[i]
 
 
 		Adiscsites = getComp(row_index, sheet, 1, composition, discList)
@@ -188,9 +188,9 @@ def gen_vector(book_name, contList, discList):
 		# Adsingles = [np.zeros((len(Adstatics[0]))), np.zeros((len(Adstatics[0]))), np.zeros((len(Adstatics[0])))]
 		# Bdsingles = [np.zeros((len(Bdstatics[0]))), np.zeros((len(Bdstatics[0]))), np.zeros((len(Bdstatics[0])))]
 		# for i in range(Adstatics.shape[0]):
-		# 	Adsingles[i] = Adstatics[i]
+		#	 Adsingles[i] = Adstatics[i]
 		# for i in range(Bdstatics.shape[0]):
-		# 	Bdsingles[i] = Bdstatics[i]
+		#	 Bdsingles[i] = Bdstatics[i]
 
 		Atot = np.sum(Astatics[:, 0], axis=0)
 		Btot = np.sum(Astatics[:, 0], axis=0)
@@ -243,17 +243,17 @@ def gen_vector(book_name, contList, discList):
 
 
 		dexample = np.r_[row_index, numberofelements, Asite_dweighted, Bsite_dweighted, Adstatics[0], Bdstatics[0],
-		                 #Adsingles[0], Adsingles[1], Adsingles[2], Bdsingles[0], Bdsingles[1], Bdsingles[2],
+						 #Adsingles[0], Adsingles[1], Adsingles[2], Bdsingles[0], Bdsingles[1], Bdsingles[2],
 
-		                 Asite_dmax, Bsite_dmax, Asite_dmin, Bsite_dmin, Asite_dptp, Bsite_dptp, stability, formation_E]
+						 Asite_dmax, Bsite_dmax, Asite_dmin, Bsite_dmin, Asite_dptp, Bsite_dptp, stability, formation_E]
 		dexamples.append(dexample)
 
 		cexample = np.r_[row_index, goldschmidt_TF, goldschmidt_TF_ionic, octahedral, octahedral_ionic, A_O, B_O, A_B,
-		                 #Asingles[0], Asingles[1], Asingles[2], Bsingles[0], Bsingles[1], Bsingles[2],
-		                 Astatics[0], Bstatics[0],
-		                 AB_avg, AB_diff, ABPRatio, Asite_weighted, Bsite_weighted,
-		                 Asite_max, Bsite_max, Asite_min, Bsite_min, Asite_ptp, Bsite_ptp,
-		                 stability, formation_E]
+						 #Asingles[0], Asingles[1], Asingles[2], Bsingles[0], Bsingles[1], Bsingles[2],
+						 Astatics[0], Bstatics[0],
+						 AB_avg, AB_diff, ABPRatio, Asite_weighted, Bsite_weighted,
+						 Asite_max, Bsite_max, Asite_min, Bsite_min, Asite_ptp, Bsite_ptp,
+						 stability, formation_E]
 		cexamples.append(cexample)
 
 	dexamples.insert(0, add_dheader(dexamples[0].size, discList))
@@ -273,16 +273,16 @@ def write_to_csv(output_type, data):
 		writer = csv.writer(csv_file, delimiter=',')
 		writer.writerows(data)
 
-def gen_train(filename='training_set3.xlsx', output=0):
-	contList = get_dict_list('continousproperty.xlsx')
-	discList = get_dict_list('discrictproperty.xlsx')
+def gen_train(filename='training_set3.csv', output=0):
+	contList = get_dict_list('xls/continousproperty.xls')
+	discList = get_dict_list('xls/discrictproperty.xls')
 	cexamples, dexamples = gen_vector(filename, contList, discList)
 	write_to_csv('c_{}_train'.format(output), cexamples)
 	write_to_csv('d_{}_train'.format(output), dexamples)
 
-def gen_test(filename='Testing_set3.xlsx', output=0):
-	contList = get_dict_list('continousproperty.xlsx')
-	discList = get_dict_list('discrictproperty.xlsx')
+def gen_test(filename='Testing_set3.csv', output=0):
+	contList = get_dict_list('xls/continousproperty.xls')
+	discList = get_dict_list('xls/discrictproperty.xls')
 	ctexamples, dtexamples = gen_vector(filename, contList, discList)
 	write_to_csv('c_{}_test'.format(output), ctexamples)
 	write_to_csv('d_{}_test'.format(output), dtexamples)

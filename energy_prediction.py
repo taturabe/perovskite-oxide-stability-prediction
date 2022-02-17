@@ -43,7 +43,7 @@ def select_features(index_file, select_n, X_total):
 	indices_data = pd.read_csv(index_file, names=['order'])
 	indices = np.array(indices_data['order'].tolist())
 	selected = indices[:select_n]
-	X_features = X_total.ix[:, selected]
+	X_features = X_total.iloc[:, selected]
 	return X_features
 
 def classification(X_scale, X_scale_test, y):
@@ -92,7 +92,7 @@ def write_result(testfile, output, clf_result, EaH_predict, FE_predict):
 	                             'A site #3', 'B site #1', 'B site #2', 'B site #3',
 	                             'X site', 'Number of elements']]
 	result = pd.concat([raw_composition, clf_result, EaH_predict, FE_predict], axis=1)
-	result.to_excel(output, index=None)
+	result.to_excel(output, index=None, engine='xlwt')
 
 def wrap_data(trainfile, testfile, id=0):
 
@@ -120,15 +120,15 @@ def wrap_data(trainfile, testfile, id=0):
 
 if __name__ == "__main__":
 
-	trainfile = 'perovskite_DFT_EaH_FormE.xlsx' if len(sys.argv)<=1 else sys.argv[1]
-	testfile = 'newCompound.xlsx' if len(sys.argv)<=2 else sys.argv[2]
+	trainfile = 'xls/perovskite_DFT_EaH_FormE.xls' if len(sys.argv)<=1 else sys.argv[1]
+	testfile = 'xls/newCompound.xls' if len(sys.argv)<=2 else sys.argv[2]
 	id = 0 if len(sys.argv)<=3 else sys.argv[3]
 
 	X_scale, X_scale_test, y, ye, yf = wrap_data(trainfile, testfile, id)
 	clf_result = classification(X_scale, X_scale_test, y)
 	EaH_predict = reg_EaH(X_scale, X_scale_test, ye)
 	FE_predict = reg_FE(X_scale, X_scale_test, yf, ye)
-	output = 'prediction_result.xlsx'
+	output = 'prediction_result.xls'
 	write_result(testfile, output, clf_result, EaH_predict, FE_predict)
 
 
